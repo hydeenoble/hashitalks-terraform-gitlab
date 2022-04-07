@@ -14,10 +14,5 @@ resource "aws_dynamodb_table" "dynamodb_table" {
     type = "S"
   }
 
-  attribute {
-    name = "TopScore"
-    type = "N"
-  }
-
   tags = merge({ Name = "${local.application}-${terraform.workspace}" }, var.tags)
 }
