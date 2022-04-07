@@ -1,0 +1,11 @@
+terraform:lint:
+  stage: format
+  before_script:
+    - apk update && apk add --no-cache jq curl bash
+    - bash ./_ci/scripts/clear-auto-generated-discussions.sh
+  script:
+    - terraform fmt --check=true -recursive -diff
+  only:
+    - merge_requests
+  tags:
+    - dind

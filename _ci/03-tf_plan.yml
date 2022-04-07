@@ -1,0 +1,47 @@
+terraform:plan:
+  stage: plan
+  before_script:
+    - apk update && apk add --no-cache jq curl unzip
+    - cd ./applications/${APP_DIR} 
+    - |
+      echo https://gitlab-ci-token:${CI_JOB_TOKEN}@git.westwing.eu > ${HOME}/.git-credentials \
+      && git config --global credential.helper store
+    - terraform init
+  script:
+    - alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"
+    - terraform workspace select $WORKSPACE
+    - terraform init
+    - terraform plan -var-file=./config/${WORKSPACE}.tfvars -detailed-exitcode -out=./${APP_DIR}-${WORKSPACE}.tfplan 2> /dev/null || ec=$?
+    - |
+      case $ec in
+        0) echo "No Changes Found"; exit 0;;
+        1) printf '%s\n' "Command exited with non-zero"; exit 1;;
+        2) echo "Changes Found, opening Issue"; 
+            echo "**${CI_JOB_NAME}**" > plan.tfplan;
+            echo \`\`\`diff >> plan.tfplan;
+            terraform show -no-color ./${APP_DIR}-${WORKSPACE}.tfplan | tee -a plan.tfplan;
+            echo \`\`\` >> plan.tfplan; 
+            sed -i -e 's/  +/+/g' plan.tfplan; 
+            sed -i -e 's/  ~/~/g' plan.tfplan; 
+            sed -i -e 's/  -/-/g' plan.tfplan;
+            MESSAGE=$(cat plan.tfplan);
+            curl -X POST -g -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --data-urlencode "body=${MESSAGE}" \
+            "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions";
+      esac      
+    - terraform show --json ./${APP_DIR}-${WORKSPACE}.tfplan | convert_report > ./${APP_DIR}-${WORKSPACE}-tfplan.json
+  artifacts:
+    name: ${CI_JOB_NAME}
+    paths:
+      - applications/${APP_DIR}/${APP_DIR}-${WORKSPACE}.tfplan
+    expire_in: 1 week
+    reports:
+      terraform: applications/${APP_DIR}/${APP_DIR}-${WORKSPACE}-tfplan.json
+  only:
+    refs:
+      - merge_requests
+      - schedules
+      - master
+  tags:
+    - dind
+  parallel: !reference [.parallel,parallel]

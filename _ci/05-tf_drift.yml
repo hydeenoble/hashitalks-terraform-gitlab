@@ -1,0 +1,33 @@
+terraform:app:drift:
+  stage: drift-check
+  image:
+    name: cloudskiff/driftctl
+    entrypoint: [""]
+  before_script:
+    - apk add --no-cache curl bash jq
+  script:
+    - mkdir public -p
+    - driftctl scan --deep --to aws+tf --from tfstate+s3://westwingnow-platform-state/env:/**/**/terraform.tfstate --output json://public/result.json --output html://public/index.html 2>/dev/null || true
+    - ./_ci/drift/drift.sh
+  artifacts:
+    expire_in: 7 days
+    paths: 
+      - public
+  only:
+    - schedules
+  tags:
+    - shell
+
+pages:
+  stage: publish
+  dependencies:
+    - terraform:app:drift
+  script: 
+    - chmod 777 -R public/
+  artifacts:
+    paths:
+    - public
+  tags:
+    - dind
+  only:
+    - schedules

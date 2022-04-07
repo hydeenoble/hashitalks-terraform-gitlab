@@ -1,0 +1,19 @@
+.terraform
+terraform.tfstate
+*.tfstate*
+terraform.tfvars
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+*.vscode
+*.DS_Store
+
+trash/
+public/
+
+.idea
+*.iml
