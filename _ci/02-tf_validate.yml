@@ -1,10 +1,7 @@
 terraform:validate:
   stage: validate
-  before_script:
-    - cd applications/${APP_DIR}
-    - apk add --no-cache curl unzip
-    - terraform init
   script:
+    - terraform init
     - terraform workspace select $WORKSPACE
     - terraform validate
   only:

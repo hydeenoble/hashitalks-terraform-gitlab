@@ -15,7 +15,7 @@ image:
           - app-1
 stages:
   - format
-#   - validate
+  - validate
 #   - plan
 #   - apply
 #   - drift-check
@@ -24,7 +24,7 @@ stages:
 
 include:
   - local: _ci/01-tf_fmt.yml
-#   - local: _ci/02-tf_validate.yml
+  - local: _ci/02-tf_validate.yml
 #   - local: _ci/03-tf_plan.yml
 #   - local: _ci/04-tf_apply.yml
 #   - local: _ci/05-tf_drift.yml
