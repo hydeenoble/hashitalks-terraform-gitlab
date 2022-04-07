@@ -3,9 +3,6 @@ terraform:plan:
   before_script:
     - apk update && apk add --no-cache jq curl unzip
     - cd ./applications/${APP_DIR} 
-    - |
-      echo https://gitlab-ci-token:${CI_JOB_TOKEN}@git.westwing.eu > ${HOME}/.git-credentials \
-      && git config --global credential.helper store
     - terraform init
   script:
     - alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"

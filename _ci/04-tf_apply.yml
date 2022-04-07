@@ -3,9 +3,6 @@ terraform:apply:
   before_script:
     - cd ./applications/${APP_DIR}
     - apk add --no-cache curl unzip
-    - |
-      echo https://gitlab-ci-token:${CI_JOB_TOKEN}@git.westwing.eu > ${HOME}/.git-credentials \
-      && git config --global credential.helper store
     - terraform init
   needs:
     - job: terraform:plan
