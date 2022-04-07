@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "s3_bucket" {
   bucket = var.bucket
-  tags = var.tags
+  tags   = var.tags
 
   force_destroy = true
 }

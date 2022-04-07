@@ -1,8 +1,8 @@
 resource "aws_dynamodb_table" "dynamodb_table" {
-  name           = "${local.application}-${terraform.workspace}"
-  billing_mode     = "PAY_PER_REQUEST"
-  hash_key       = "UserId"
-  range_key      = "GameTitle"
+  name         = "${local.application}-${terraform.workspace}"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "UserId"
+  range_key    = "GameTitle"
 
   attribute {
     name = "UserId"
@@ -19,5 +19,5 @@ resource "aws_dynamodb_table" "dynamodb_table" {
     type = "N"
   }
 
-  tags = merge({Name ="${local.application}-${terraform.workspace}"}, var.tags)
+  tags = merge({ Name = "${local.application}-${terraform.workspace}" }, var.tags)
 }
