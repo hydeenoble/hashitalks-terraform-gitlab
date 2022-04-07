@@ -1,0 +1,17 @@
+terraform:apply:
+  stage: apply
+  before_script:
+    - cd ./applications/${APP_DIR}
+    - apk add --no-cache curl unzip
+    - terraform init
+  needs:
+    - job: terraform:plan
+      artifacts: true
+  script:
+    - terraform workspace select $WORKSPACE
+    - terraform init
+    - terraform apply -input=false ./${APP_DIR}-${WORKSPACE}.tfplan
+  when: manual
+  only:
+    - master
+  parallel: !reference [.parallel,parallel]

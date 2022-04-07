@@ -1,0 +1,12 @@
+terraform:validate:
+  stage: validate
+  script:
+    - terraform -chdir=applications/${APP_DIR} init
+    - terraform -chdir=applications/${APP_DIR} workspace select $WORKSPACE
+    - terraform -chdir=applications/${APP_DIR} validate
+  only:
+    refs: 
+      - merge_requests
+  tags:
+    - dind
+  parallel: !reference [.parallel,parallel]
